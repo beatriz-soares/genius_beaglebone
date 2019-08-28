@@ -12,16 +12,18 @@ COMO ESSE PROGRAMA FUNCIONA?
 - Esperamos o player apertar (e soltar) o botão 1.
 
 - Ao começar o jogo, geramos uma sequência aleatória de leds que piscam.
-	- Como separamos a hora do player e a hora da sequência?
-	- Como salvamos a sequência que vai ser mostrada?
-	- Como executamos a sequência?
+  - Como separamos a hora do player e a hora da sequência?
+  - Como salvamos a sequência que vai ser mostrada?
+  - Como executamos a sequência?
 
 - Como vamos pegar a sequência do usuário?
 
 
 */
 
-int MAXIMO_SEQUENCIA = 100;
+int MAXIMO_SEQUENCIA = 100; // tamanho de sequencia maxima que o programa pode armazenar
+int TEMPO_ACESO = 1;        // quanto tempo fica o led aceso
+int TEMPO_APAGADO = 1;      // quanto tempo fica o led apagado
 
 // ENTRADAS PARA OS BOTÕES
 BlackGPIO botao1(GPIO_62, input);
@@ -34,45 +36,82 @@ BlackGPIO led1(GPIO_45, output);
 BlackGPIO led2(GPIO_47, output);
 BlackGPIO led3(GPIO_23, output);
 
+// SEQUENCIA QUE O PLAYER DEVE REPRODUZIR
+int sequencia[MAXIMO_SEQUENCIA];
+int tam_sequencia = 0;
 
+void tocar(){
+  /*
+    Reproduz a sequência até o momento.
+    Ou seja, vai acendendo do primeiro ao ultimo led,
+    ficando um tempo aceso em cada.
+  */
+  for (int i = 0; i < tam_sequencia; i++){
+    // apaga tudo, depois só um acende
+    led1.setValue(low);
+    led2.setValue(low);
+    led3.setValue(low);
+
+    sleep(TEMPO_APAGADO);
+
+    switch(sequencia[i]){
+      case 1:
+        led1.setValue(high);
+        break;
+      case 2:
+        led2.setValue(high);
+        break;
+      case 3:
+        led3.setValue(high);
+        break;
+      default:
+        break;
+    }
+
+    sleep(TEMPO_ACESO);
+  }
+}
 int main(int argc, char* argv[]){
-	int sequencia[MAXIMO_SEQUENCIA];
-	int tam_sequencia = 0;
+  // FLAGS DE CONTROLE
+  bool turno_player = false;  // se é hora do player jogar ou de tocar a sequencia
 
-	srand(time(NULL));
-	int randNum = 0;
+  // CONTADORES
+  int pontuacao = 0;
 
-	std::cout<<"Aperte o botão 3 para começar..."<<std::endl;
+  srand(time(NULL));
+  int randNum = 0;
 
-	// esperar a pessoa apertar
-	while (botao3.getValue() != "1");
+  std::cout<<"Aperte o botão 3 para começar..."<<std::endl;
 
-	// esperar a pessoa soltar
-	while (botao3.getValue() != "0");
+  // esperar a pessoa apertar
+  while (botao3.getValue() != "1");
 
-	std::cout<<"Começando!"<<std::endl;
+  // esperar a pessoa soltar
+  while (botao3.getValue() != "0");
 
-	while(true){
-		if (botao1.getValue() == "1"){
-			std::cout<<"Botao 1!"<<std::endl;
-			led1.setValue(high);
-		}
-		else
-			led1.setValue(low);
+  std::cout<<"Começando!"<<std::endl;
 
-		if (botao2.getValue() == "1"){
-			std::cout<<"Botao 2!"<<std::endl;
-			led2.setValue(high);
-		}
-		else
-			led2.setValue(low);
+  while(true){
+    if (botao1.getValue() == "1"){
+      std::cout<<"Botao 1!"<<std::endl;
+      led1.setValue(high);
+    }
+    else
+      led1.setValue(low);
 
-		if (botao3.getValue() == "1"){
-			std::cout<<"Botao 3!"<<std::endl;
-			led3.setValue(high);
-		}
-		else
-			led3.setValue(low);		
-	}
-	return 0;
+    if (botao2.getValue() == "1"){
+      std::cout<<"Botao 2!"<<std::endl;
+      led2.setValue(high);
+    }
+    else
+      led2.setValue(low);
+
+    if (botao3.getValue() == "1"){
+      std::cout<<"Botao 3!"<<std::endl;
+      led3.setValue(high);
+    }
+    else
+      led3.setValue(low);   
+  }
+  return 0;
 }
