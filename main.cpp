@@ -1,5 +1,4 @@
 #include <iostream>
-#include <iostream>
 #include "../BlackGPIO/BlackGPIO.h"
 #include <time.h>
 #include <stdlib.h>
@@ -8,8 +7,8 @@
 using namespace BlackLib;
 
 const int MAXIMO_SEQUENCIA = 100; // tamanho de sequencia maxima que o programa pode armazenar
-const int TEMPO_ACESO = 1;        // quanto tempo fica o led aceso
-const int TEMPO_APAGADO = 1;      // quanto tempo fica o led apagado
+const int TEMPO_ACESO = 700000;        // quanto tempo fica o led aceso (us)
+const int TEMPO_APAGADO = 100000;      // quanto tempo fica o led apagado (us)
 
 // ENTRADAS PARA OS BOTÕES
 BlackGPIO botao1(GPIO_69, input); // 9
@@ -25,6 +24,12 @@ BlackGPIO led3(GPIO_23, output); // 13
 int sequencia[MAXIMO_SEQUENCIA];
 int tam_sequencia = 0;
 
+void aumentar_sequencia(){
+    int led = rand() % 3 + 1;  // numero entre 1 e 3
+    sequencia[tam_sequencia] = led;
+    tam_sequencia = tam_sequencia + 1;
+}
+
 void tocar(){
   /*
     Reproduz a sequência até o momento.
@@ -37,7 +42,7 @@ void tocar(){
     led2.setValue(low);
     led3.setValue(low);
 
-    sleep(TEMPO_APAGADO);
+    usleep(TEMPO_APAGADO);
 
     switch(sequencia[i]){
       case 1:
@@ -53,8 +58,49 @@ void tocar(){
         break;
     }
 
-    sleep(TEMPO_ACESO);
+    usleep(TEMPO_ACESO);
   }
+  
+  // apaga tudo
+    led1.setValue(low);
+    led2.setValue(low);
+    led3.setValue(low);
+}
+
+int botao_apertado(){
+    int  botao = 0;
+    
+    while (botao1.getValue() != "1" || botao2.getValue() != "1" || botao3.getValue() != "1"){
+        if (botao1.getValue() == "1"){
+            botao = 1;
+            break;
+        }
+        else if (botao2.getValue() == "1"){
+            botao = 2;
+            break;
+        }
+        else if (botao3.getValue() == "1"){
+            botao = 3;
+            break;
+        }
+        
+    }
+    
+    while (botao1.getValue() == "1" || botao2.getValue() == "1" || botao3.getValue() == "1");
+    
+    return botao;
+}
+
+bool ler(){
+    int botao;
+    for (int i = 0; i < tam_sequencia; i++){
+        botao = botao_apertado();
+        if (botao != sequencia[i]){
+            return false;
+        }
+    }
+    
+    return true;
 }
 int main(int argc, char* argv[]){
   // FLAGS DE CONTROLE
@@ -63,9 +109,8 @@ int main(int argc, char* argv[]){
 
   // CONTADORES
   int pontuacao = 0;
-
+  
   srand(time(NULL));
-  int randNum = 0;
 
   std::cout<<"Aperte o botão 3 para começar..."<<std::endl;
 
@@ -77,7 +122,20 @@ int main(int argc, char* argv[]){
 
   std::cout<<"Começando!"<<std::endl;
 
-  while(true){
+  while(!acabou){
+    aumentar_sequencia();
+    tocar();
+    
+    if (!ler()){
+        acabou = true;
+    }
+  }
+  
+  std::cout<<"Fim de jogo! Pontuacao final: "<<tam_sequencia - 1<<std::endl;
+  return 0;
+}
+
+void testar_botoes(){
     if (botao1.getValue() == "1"){
       std::cout<<"Botao 1!"<<std::endl;
       led1.setValue(high);
@@ -98,6 +156,4 @@ int main(int argc, char* argv[]){
     }
     else
       led3.setValue(low);  
-  }
-  return 0;
 }
