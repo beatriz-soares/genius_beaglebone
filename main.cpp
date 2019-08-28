@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iostream>
 #include "../BlackGPIO/BlackGPIO.h"
 #include <time.h>
 #include <stdlib.h>
@@ -6,35 +7,19 @@
 
 using namespace BlackLib;
 
-/*
-COMO ESSE PROGRAMA FUNCIONA?
-
-- Esperamos o player apertar (e soltar) o botão 1.
-
-- Ao começar o jogo, geramos uma sequência aleatória de leds que piscam.
-  - Como separamos a hora do player e a hora da sequência?
-  - Como salvamos a sequência que vai ser mostrada?
-  - Como executamos a sequência?
-
-- Como vamos pegar a sequência do usuário?
-
-
-*/
-
-int MAXIMO_SEQUENCIA = 100; // tamanho de sequencia maxima que o programa pode armazenar
-int TEMPO_ACESO = 1;        // quanto tempo fica o led aceso
-int TEMPO_APAGADO = 1;      // quanto tempo fica o led apagado
+const int MAXIMO_SEQUENCIA = 100; // tamanho de sequencia maxima que o programa pode armazenar
+const int TEMPO_ACESO = 1;        // quanto tempo fica o led aceso
+const int TEMPO_APAGADO = 1;      // quanto tempo fica o led apagado
 
 // ENTRADAS PARA OS BOTÕES
-BlackGPIO botao1(GPIO_62, input);
-BlackGPIO botao2(GPIO_22, input);
-//BlackGPIO botao3(GPIO_27, input);
-BlackGPIO botao3(GPIO_67, input);
+BlackGPIO botao1(GPIO_69, input); // 9
+BlackGPIO botao2(GPIO_22, input); // 19
+BlackGPIO botao3(GPIO_67, input); // 8
 
 // SAIDAS PARA OS LEDs
-BlackGPIO led1(GPIO_45, output);
-BlackGPIO led2(GPIO_47, output);
-BlackGPIO led3(GPIO_23, output);
+BlackGPIO led1(GPIO_45, output); // 11
+BlackGPIO led2(GPIO_47, output); // 15
+BlackGPIO led3(GPIO_23, output); // 13
 
 // SEQUENCIA QUE O PLAYER DEVE REPRODUZIR
 int sequencia[MAXIMO_SEQUENCIA];
@@ -74,6 +59,7 @@ void tocar(){
 int main(int argc, char* argv[]){
   // FLAGS DE CONTROLE
   bool turno_player = false;  // se é hora do player jogar ou de tocar a sequencia
+  bool acabou = false;
 
   // CONTADORES
   int pontuacao = 0;
@@ -111,7 +97,7 @@ int main(int argc, char* argv[]){
       led3.setValue(high);
     }
     else
-      led3.setValue(low);   
+      led3.setValue(low);  
   }
   return 0;
 }
